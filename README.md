@@ -27,9 +27,7 @@ preferences persist the same way.
 ## Notes
 
 - **Async loop:** the engine is a blocking loop with `SDL_Delay(16)`. It runs unchanged
-  by suspending in `SDL_Delay`: JSPI by default (tested in recent Chromium; check
-  current browser support for others), or `-DWEBNOVA_JSPI=OFF` for ASYNCIFY
-  (works in any wasm browser, but larger and slower).
+  by suspending in `SDL_Delay`: JSPI by default, or `-DWEBNOVA_JSPI=OFF` for ASYNCIFY.
 - **Exceptions:** built with `-fwasm-exceptions`.
 - The probe harness is disabled; the game is built with
   `EVNOVA_WARNINGS_AS_ERRORS=OFF`.
