@@ -1,5 +1,9 @@
 # webnova
 
+[![Live site](https://img.shields.io/badge/play-nipund.github.io%2Fweb--nova-a61814)](https://nipund.github.io/web-nova/)
+[![Deploy](https://img.shields.io/github/actions/workflow/status/nipund/web-nova/pages.yml?branch=main&label=deploy)](https://github.com/nipund/web-nova/actions/workflows/pages.yml)
+[![WebAssembly](https://img.shields.io/badge/WebAssembly-Emscripten-654ff0?logo=webassembly&logoColor=white)](https://emscripten.org/)
+
 Build of [wraitii/evnova-decomp](https://github.com/wraitii/evnova-decomp) for the browser with Emscripten.
 The upstream repo is a git submodule in `extern/evnova-decomp` and is not
 modified. Everything web-specific lives here.
