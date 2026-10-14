@@ -21,6 +21,22 @@ export function listPilots() {
   }
 }
 
+// Removes a pilot file and persists the change to IndexedDB.
+export async function deletePilot(pilot) {
+  fs().unlink(pilot.path);
+  if (window.Module.syncOut) await window.Module.syncOut();
+}
+
+// Hands a pilot file to the browser as a download.
+export function exportPilot(pilot) {
+  const blob = new Blob([fs().readFile(pilot.path)], { type: "application/octet-stream" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = pilot.file;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
 // Opens the browser's file picker and copies the chosen file into the virtual
 // filesystem. Resolves to its path there, or null if nothing was chosen.
 // Call this synchronously from a click handler so the picker is allowed to open.

@@ -2,7 +2,7 @@
 // (sdl_dialog_web.cpp) talks to it through window.novaUI.
 
 import { html, render } from "./deps.js";
-import { importFromDisk, listPilots } from "./fs.js";
+import { importFromDisk } from "./fs.js";
 import { PilotDialog } from "./pilot-dialog.js";
 
 const stylesheet = document.createElement("link");
@@ -33,7 +33,6 @@ function openFileDialog(accept) {
   if (!accept.toLowerCase().includes(".plt")) return importFromDisk(accept);
   return openModal((done) => html`
     <${PilotDialog}
-      pilots=${listPilots()}
       onPick=${done}
       onImport=${() => done(importFromDisk(accept))}
       onCancel=${() => done(null)} />`);

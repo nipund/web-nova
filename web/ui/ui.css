@@ -22,11 +22,26 @@
 .nova-empty { padding: 5px 8px; color: var(--dim); }
 .nova-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-/* List entries are plain rows, not the red pill buttons. */
-.nova-modal .nova-list button.nova-row {
-  min-width: 0; padding: 5px 8px; border: 0; border-radius: 0; background: transparent;
-  box-shadow: none; text-shadow: none; filter: none; outline: none;
-  font-weight: normal; color: var(--fg); text-align: left;
+.nova-error { padding: 0 4px; color: var(--bad); }
+
+/* List entries are plain rows, not the red pill buttons: the pilot name plus
+   small text-style actions on the right. The whole row lights up as one. */
+.nova-item { display: flex; align-items: center; gap: 2px; padding-right: 4px; color: var(--fg); }
+.nova-item:hover, .nova-item:focus-within { background: #7a0e0a; color: #fff; }
+.nova-item.nova-confirming, .nova-item.nova-confirming:hover, .nova-item.nova-confirming:focus-within {
+  padding: 5px 4px 5px 8px; background: #3a0907; color: var(--fg); }
+.nova-confirm-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nova-modal .nova-item button {
+  min-width: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none;
+  text-shadow: none; filter: none; outline: none; font-weight: normal; color: inherit;
 }
-.nova-modal .nova-list button.nova-row:hover,
-.nova-modal .nova-list button.nova-row:focus { background: #7a0e0a; color: #fff; }
+.nova-modal .nova-item button.nova-row {
+  flex: 1; min-width: 0; padding: 5px 8px; text-align: left; overflow: hidden; text-overflow: ellipsis;
+}
+.nova-modal .nova-item button.nova-act { padding: 3px 7px; color: var(--dim); }
+.nova-modal .nova-item:hover button.nova-act,
+.nova-modal .nova-item:focus-within button.nova-act { color: #ddd; }
+.nova-modal .nova-item button.nova-act:hover,
+.nova-modal .nova-item button.nova-act:focus { color: #fff; background: rgba(255, 255, 255, .18); }
+.nova-modal .nova-item button.nova-delete { color: var(--bad); }

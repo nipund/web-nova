@@ -139,6 +139,7 @@
     }));
   }
   const stageOn = () => $("stage").classList.contains("on");
+  Module.syncOut = syncOut;                                       // for web/ui/ after file changes
   setInterval(() => { if (stageOn()) syncOut(); }, 10000);        // pilots, prefs
   document.addEventListener("visibilitychange", () => { if (document.hidden) syncOut(); });
   addEventListener("pagehide", syncOut);

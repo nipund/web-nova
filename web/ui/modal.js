@@ -2,8 +2,9 @@ import { html, useEffect, useRef } from "./deps.js";
 
 // Overlay + gunmetal panel with a title bar. Focuses the first button on open,
 // closes on Escape, and keeps keystrokes away from the game's key handlers.
-export function Modal({ title, onCancel, children }) {
-  const panel = useRef(null);
+export function Modal({ title, onCancel, panelRef, children }) {
+  const own = useRef(null);
+  const panel = panelRef || own;
   useEffect(() => {
     const first = panel.current && panel.current.querySelector("button");
     if (first) first.focus();
