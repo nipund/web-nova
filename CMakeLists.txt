@@ -76,6 +76,12 @@ set_source_files_properties(web/sdl_dialog_web.cpp PROPERTIES SKIP_PRECOMPILE_HE
 # ---------------------------------------------------------------------------
 set(WEBNOVA_SHELL "${CMAKE_CURRENT_SOURCE_DIR}/web/shell.html")
 
+# The page's UI modules (Preact components, see web/ui/) are served as-is next
+# to index.html; re-copied on every build so edits show up without a relink.
+add_custom_target(webnova_ui ALL
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory
+          "${CMAKE_CURRENT_SOURCE_DIR}/web/ui" "${CMAKE_BINARY_DIR}/site/ui")
+
 set(_async_flag -sASYNCIFY=1)
 if(WEBNOVA_JSPI)
   set(_async_flag -sJSPI=1)

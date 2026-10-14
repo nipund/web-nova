@@ -70,8 +70,7 @@
     <h1>Escape Velocity Nova</h1>
     <div class="well">
       <p>Recompiled engine running in WebAssembly. The game data is not included:
-         provide the <b>EV Nova Community Edition</b> zip from your computer
-         (<a href="https://github.com/andrews05/EV-Nova-CE/releases/latest/download/EV_Nova_Community_Edition.zip">download it here</a>, 88 MB).
+         provide the <b>EV Nova Community Edition</b> zip from your computer.
          It is unpacked and kept in your browser, so you only do this once.</p>
 
       <div id="drop" class="drop">
@@ -93,6 +92,7 @@
 
 <div id="stage"><canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas></div>
 
+<script type="module" src="ui/ui.js"></script>
 <script>
 (() => {
   "use strict";

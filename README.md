@@ -13,7 +13,7 @@ scripts/serve.py                               # http://localhost:8080
 ```
 
 Needs `cmake` (3.25+), `ninja`, `git`, and Python 3. Output is
-`build/wasm-release/site/{index.html,index.js,index.wasm}`; `wasm-debug` is the
+`build/wasm-release/site/{index.html,index.js,index.wasm,ui/}`; `wasm-debug` is the
 other preset (`scripts/build.sh wasm-debug`).
 
 ## Game data
@@ -33,6 +33,9 @@ preferences persist the same way.
   `EVNOVA_WARNINGS_AS_ERRORS=OFF`.
 - Emscripten ports are prebuilt by `scripts/build.sh` (`embuilder`), because parallel
   ninja jobs otherwise race on the port cache lock on a cold cache.
+
+- **UI:** in-page dialogs are Preact + htm components in `web/ui/` (ES modules, pinned in `web/ui/deps.js`). `web/ui/fs.js` holds
+  the virtual-filesystem access, and `sdl_dialog_web.cpp` just calls `window.novaUI`.
 
 ## Licensing
 

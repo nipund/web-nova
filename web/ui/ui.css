@@ -1,0 +1,32 @@
+/* Styles for the in-page dialogs. Colour variables and the red pill <button>
+   come from shell.html; only what differs is declared here. */
+
+.nova-overlay {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+  background: rgba(0, 0, 0, .75); color: var(--fg);
+}
+.nova-panel {
+  width: min(420px, 92vw); max-height: 80vh; display: flex; flex-direction: column;
+  gap: 10px; padding: 12px; border: 2px solid #000;
+  background: linear-gradient(180deg, var(--metal-hi), var(--metal) 8%, var(--metal) 92%, var(--metal-lo));
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .35), 0 12px 40px rgba(0, 0, 0, .8);
+}
+.nova-title {
+  padding: 5px 8px; text-align: center; font-size: 17px; font-weight: bold; color: #f2f2f2;
+  background: linear-gradient(180deg, #2c2c2c, #0d0d0d); border: 1px solid #000;
+}
+.nova-list {
+  display: flex; flex-direction: column; gap: 1px; overflow-y: auto; padding: 4px;
+  background: var(--well); border: 1px solid #000;
+}
+.nova-empty { padding: 5px 8px; color: var(--dim); }
+.nova-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+/* List entries are plain rows, not the red pill buttons. */
+.nova-modal .nova-list button.nova-row {
+  min-width: 0; padding: 5px 8px; border: 0; border-radius: 0; background: transparent;
+  box-shadow: none; text-shadow: none; filter: none; outline: none;
+  font-weight: normal; color: var(--fg); text-align: left;
+}
+.nova-modal .nova-list button.nova-row:hover,
+.nova-modal .nova-list button.nova-row:focus { background: #7a0e0a; color: #fff; }
