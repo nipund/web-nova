@@ -1,0 +1,3 @@
+[submodule "extern/evnova-decomp"]
+	path = extern/evnova-decomp
+	url = https://github.com/wraitii/evnova-decomp
