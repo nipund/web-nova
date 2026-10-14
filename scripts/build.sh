@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Configure and build the browser/wasm game.
 #   scripts/build.sh [preset]      preset: wasm-release (default) | wasm-debug
-# Output: build/<preset>/site/ (index.html, index.js, index.wasm); serve with scripts/serve.py
-# copies the deployable files to dist/.
+# Output: build/<preset>/site/ (index.html, index.js, index.wasm, ui/); serve with scripts/serve.py.
+# That directory is what the Pages workflow publishes.
 set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 preset="${1:-wasm-release}"

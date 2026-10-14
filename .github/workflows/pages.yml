@@ -1,0 +1,65 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer push supersedes a queued one, but never cancel
+# a deploy that is already running.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Read pinned Emscripten version
+        id: emsdk
+        run: echo "version=$(tr -d '[:space:]' < .emsdk-version)" >> "$GITHUB_OUTPUT"
+
+      # Exports EMSDK and puts emcc on PATH; scripts/build.sh honours an existing $EMSDK.
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ steps.emsdk.outputs.version }}
+          actions-cache-folder: emsdk-cache
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Build
+        run: scripts/build.sh wasm-release
+
+      - name: Check the site output
+        run: |
+          for f in index.html index.js index.wasm ui/ui.js ui/ui.css; do
+            test -f "build/wasm-release/site/$f" || { echo "missing $f" >&2; exit 1; }
+          done
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/wasm-release/site
+
+  deploy:
+    # Pull requests only prove the build; they do not publish.
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
