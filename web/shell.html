@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape Velocity Nova</title>
+<style>
+  /* Look: EV Nova's gunmetal panels, black text wells and glossy red pill buttons. */
+  :root {
+    --bg: #000; --fg: #e6e6e6; --dim: #a3a3a3; --well: #050505; --edge: #1a1a1a;
+    --metal-hi: #8a8a8a; --metal: #5c5c5c; --metal-lo: #3a3a3a;
+    --red-hi: #e24a3a; --red: #a61814; --red-lo: #4a0504;
+    --bad: #ff6a55; --good: #8fd18f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 13px/1.45 Geneva, "Lucida Grande", Verdana, sans-serif; }
+  #stage { position: fixed; inset: 0; display: none; }
+  #stage.on { display: grid; place-items: center; }
+  /* SDL sizes the canvas itself (inline style); the stage just centres it. */
+  canvas#canvas { display: block; outline: none; background: #000; }
+  #setup { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; }
+  #setup.off { display: none; }
+
+  .card { width: min(560px, 100%); padding: 12px; border: 2px solid #000;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.05) 1px 2px),
+                linear-gradient(180deg, var(--metal-hi), var(--metal) 8%, var(--metal) 92%, var(--metal-lo));
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.35), inset -1px -1px 0 rgba(0,0,0,.6),
+                0 0 0 1px #2a2a2a, 0 12px 40px rgba(0,0,0,.8); }
+  h1 { margin: 0 0 10px; padding: 5px 8px; text-align: center; font-size: 17px; font-weight: bold;
+    color: #f2f2f2; background: linear-gradient(180deg, #2c2c2c, #0d0d0d);
+    border: 1px solid #000; box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+  .well { padding: 12px 14px; background: var(--well); border: 1px solid #000;
+    box-shadow: inset 1px 1px 0 #2e2e2e, inset -1px -1px 0 #222, 0 1px 0 rgba(255,255,255,.3); }
+  p { margin: 0 0 10px; color: var(--fg); }
+  a { color: #ff8f7a; }
+  b { color: #fff; }
+  small { color: var(--dim); }
+
+  button, label.btn { appearance: none; display: inline-block; min-width: 96px; padding: 3px 18px 4px;
+    border: 1px solid #1a0000; border-radius: 999px; font: bold 13px/1.5 inherit; font-family: inherit;
+    color: #fff; text-align: center; text-shadow: 0 1px 1px rgba(0,0,0,.8); cursor: pointer;
+    background: linear-gradient(180deg, var(--red-hi) 0%, var(--red) 45%, var(--red-lo) 55%, #7a0e0a 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.25); }
+  button:hover:not(:disabled), label.btn:hover { filter: brightness(1.2); }
+  button:active:not(:disabled), label.btn:active { filter: brightness(.85); }
+  button:disabled { cursor: default; color: #9a9a9a; text-shadow: none;
+    background: linear-gradient(180deg, #5a5a5a, #3b3b3b 50%, #2a2a2a 55%, #353535); }
+  button.primary { min-width: 120px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 12px 0 0; }
+  input[type=file] { display: none; }
+
+  .drop { margin: 0 0 10px; padding: 14px; text-align: center; color: var(--dim);
+    border: 1px dashed #666; }
+  .drop.hot { border-color: var(--red-hi); color: var(--fg); background: #140606; }
+
+  progress { appearance: none; display: block; width: 100%; height: 10px; margin: 10px 0 0;
+    border: 1px solid #000; border-radius: 0; background: #111; color: var(--red); }
+  progress[hidden] { display: none; }
+  progress::-webkit-progress-bar { background: #111; border-radius: 0; }
+  progress::-webkit-progress-value { background: linear-gradient(180deg, var(--red-hi), var(--red-lo)); border-radius: 0; }
+  progress::-moz-progress-bar { background: var(--red); border-radius: 0; }
+  #status { min-height: 3em; margin-top: 8px; color: var(--dim); white-space: pre-wrap; }
+  #status.bad { color: var(--bad); } #status.good { color: var(--good); }
+</style>
+</head>
+<body>
+<div id="setup">
+  <div class="card">
+    <h1>Escape Velocity Nova</h1>
+    <div class="well">
+      <p>Recompiled engine running in WebAssembly. The game data is not included:
+         provide the <b>EV Nova Community Edition</b> zip from your computer
+         (<a href="https://github.com/andrews05/EV-Nova-CE/releases/latest/download/EV_Nova_Community_Edition.zip">download it here</a>, 88 MB).
+         It is unpacked and kept in your browser, so you only do this once.</p>
+
+      <div id="drop" class="drop">
+        Drop <b>EV_Nova_Community_Edition.zip</b> here, or
+        <label class="btn" for="pickzip">Choose zip…</label>
+        <input id="pickzip" type="file" accept=".zip,application/zip">
+      </div>
+
+      <progress id="bar" value="0" max="1" hidden></progress>
+      <div id="status" role="status"></div>
+      <p><small>Everything stays in this browser (IndexedDB). Pilots and preferences are saved there too.</small></p>
+    </div>
+    <div class="row">
+      <button id="play" class="primary" disabled>Play</button>
+      <button id="forget" disabled>Remove stored data</button>
+    </div>
+  </div>
+</div>
+
+<div id="stage"><canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas></div>
+
+<script>
+(() => {
+  "use strict";
+  const DATA_DIR = "/EV Nova";        // where the engine looks (nova_paths.cpp)
+  const PREF_DIR = "/libsdl";         // SDL_GetPrefPath root on Emscripten
+  const MARKER = DATA_DIR + "/.webnova-installed";
+  // Not used by the port: Windows binaries, QuickTime, movies, docs.
+  const SKIP = /(^|\/)documentation\/|\.(exe|dll|qts|qtx|mov|pdf|nplay)$/i;
+
+  const $ = (id) => document.getElementById(id);
+  const statusEl = $("status"), bar = $("bar"), playBtn = $("play"), forgetBtn = $("forget");
+  const say = (text, kind = "") => { statusEl.textContent = text; statusEl.className = kind; };
+  const progress = (done, total) => { bar.hidden = false; bar.max = total || 1; bar.value = done; };
+  const mb = (n) => (n / 1048576).toFixed(0) + " MB";
+
+  var Module = window.Module = {};
+  let FS = null, ready = false, syncing = false, resync = false, busy = false;
+
+  Module.canvas = $("canvas");
+  Module.noInitialRun = true;
+  Module.print = (t) => console.log(t);
+  Module.printErr = (t) => console.warn(t);
+  Module.onAbort = (what) => { say("The game crashed: " + what, "bad"); showSetup(); };
+  Module.preRun = [() => {
+    FS = Module.FS || window.FS;
+    const idbfs = Module.IDBFS || window.IDBFS;
+    for (const dir of [PREF_DIR, DATA_DIR]) { FS.mkdir(dir); FS.mount(idbfs, {}, dir); }
+    Module.addRunDependency("idbfs");
+    FS.syncfs(true, (err) => {
+      if (err) console.error("IDBFS load failed", err);
+      Module.removeRunDependency("idbfs");
+    });
+  }];
+  Module.postRun = [() => { ready = true; refresh(); }];
+
+  function syncOut() {
+    if (!ready) return Promise.resolve();
+    if (syncing) { resync = true; return Promise.resolve(); }
+    syncing = true; resync = false;
+    return new Promise((res) => FS.syncfs(false, (e) => {
+      if (e) console.error("IDBFS save failed", e);
+      syncing = false; res();
+      if (resync) syncOut();
+    }));
+  }
+  const stageOn = () => $("stage").classList.contains("on");
+  setInterval(() => { if (stageOn()) syncOut(); }, 10000);        // pilots, prefs
+  document.addEventListener("visibilitychange", () => { if (document.hidden) syncOut(); });
+  addEventListener("pagehide", syncOut);
+
+  function showSetup() { $("stage").classList.remove("on"); $("setup").classList.remove("off"); }
+  const haveData = () => { try { return FS.analyzePath(MARKER).exists; } catch { return false; } };
+
+  function refresh() {
+    if (busy || !ready) return;
+    const has = haveData();
+    playBtn.disabled = !has;
+    forgetBtn.disabled = !has;
+    say(has ? "Game data found in this browser." : "No game data yet: provide the zip above.", has ? "good" : "");
+  }
+
+  // ---- installing files --------------------------------------------------
+  // Paths are [segment...]. The install root is whatever sits directly above
+  // "Nova Files" (or is the folder holding Nova.rez), so a zip with an
+  // "EV Nova/" prefix, the EV Nova folder itself, or its parent all work.
+  function rootDepth(paths) {
+    for (const p of paths) {
+      const i = p.findIndex((s, k) => k < p.length - 1 && /^nova files$/i.test(s));
+      if (i >= 0) return i;
+      if (/^nova\.rez$/i.test(p[p.length - 1])) return p.length - 1;
+    }
+    return -1;
+  }
+  function ensureDir(path) {
+    let cur = "";
+    for (const seg of path.split("/").filter(Boolean)) {
+      cur += "/" + seg;
+      if (!FS.analyzePath(cur).exists) FS.mkdir(cur);
+    }
+  }
+  function installFile(rel, bytes) {
+    ensureDir([DATA_DIR, ...rel.slice(0, -1)].join("/"));
+    FS.writeFile(DATA_DIR + "/" + rel.join("/"), bytes);
+  }
+  function wanted(path) { return !SKIP.test(path.join("/")) && !/^(\.DS_Store|Thumbs\.db|desktop\.ini)$/i.test(path[path.length - 1]); }
+  async function finishInstall() {
+    // The engine expects these to exist even when empty.
+    for (const d of ["Nova Plug-ins", "Pilots"]) ensureDir(DATA_DIR + "/" + d);
+    FS.writeFile(MARKER, new Date().toISOString());
+    say("Saving to browser storage…");
+    await syncOut();
+    // syncOut() may defer while another sync runs; wait until quiescent.
+    while (syncing) await new Promise((r) => setTimeout(r, 50));
+  }
+
+  // ---- zip ---------------------------------------------------------------
+  async function inflateRaw(bytes) {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  function readCentralDirectory(buf) {
+    const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+    let e = buf.length - 22;
+    while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    if (e < 0) throw new Error("not a zip file");
+    const count = dv.getUint16(e + 10, true);
+    let p = dv.getUint32(e + 16, true);
+    const td = new TextDecoder();
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error("corrupt zip directory");
+      const ent = {
+        method: dv.getUint16(p + 10, true), csize: dv.getUint32(p + 20, true),
+        usize: dv.getUint32(p + 24, true), lho: dv.getUint32(p + 42, true),
+      };
+      const nlen = dv.getUint16(p + 28, true), elen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+      ent.name = td.decode(buf.subarray(p + 46, p + 46 + nlen));
+      if (ent.csize === 0xffffffff || ent.usize === 0xffffffff || ent.lho === 0xffffffff) throw new Error("zip64 is not supported");
+      out.push(ent);
+      p += 46 + nlen + elen + clen;
+    }
+    return { dv, entries: out };
+  }
+  async function installZip(buf) {
+    const { dv, entries } = readCentralDirectory(buf);
+    const files = entries.filter((e) => !e.name.endsWith("/")).map((e) => ({ e, path: e.name.split("/") }));
+    const depth = rootDepth(files.map((f) => f.path));
+    if (depth < 0) throw new Error("the archive has no “Nova Files” folder");
+    const todo = files.filter((f) => f.path.length > depth && wanted(f.path.slice(depth)));
+    const total = todo.reduce((n, f) => n + f.e.usize, 0);
+    let done = 0;
+    for (const { e, path } of todo) {
+      const rel = path.slice(depth);
+      say(`Unpacking ${rel.join("/")}`);
+      const lh = e.lho;
+      if (dv.getUint32(lh, true) !== 0x04034b50) throw new Error("corrupt zip entry " + e.name);
+      const start = lh + 30 + dv.getUint16(lh + 26, true) + dv.getUint16(lh + 28, true);
+      const raw = buf.subarray(start, start + e.csize);
+      let data;
+      if (e.method === 0) data = raw;
+      else if (e.method === 8) data = await inflateRaw(raw);
+      else throw new Error(`unsupported zip compression method ${e.method} for ${e.name}`);
+      installFile(rel, data);
+      done += e.usize; progress(done, total);
+    }
+  }
+
+  // ---- zip from the local filesystem ----------------------------------------
+  async function importZip(file) {
+    busy = true; playBtn.disabled = forgetBtn.disabled = true;
+    try {
+      say(`Reading ${file.name}…`);
+      await installZip(new Uint8Array(await file.arrayBuffer()));
+      await finishInstall();
+    } catch (err) {
+      console.error(err);
+      try { FS.analyzePath(MARKER).exists && FS.unlink(MARKER); } catch {}
+      busy = false; bar.hidden = true; refresh();
+      say("That file could not be used: " + (err.message || err), "bad");
+      return;
+    }
+    busy = false; bar.hidden = true; refresh();
+  }
+  $("pickzip").addEventListener("change", (e) => {
+    const f = e.target.files[0];
+    e.target.value = "";
+    if (f) importZip(f);
+  });
+
+  // ---- drag and drop -------------------------------------------------------
+  const drop = $("drop");
+  const hot = (on) => drop.classList.toggle("hot", on);
+  for (const t of ["dragenter", "dragover"]) addEventListener(t, (e) => { e.preventDefault(); hot(true); });
+  for (const t of ["dragleave", "drop"]) addEventListener(t, (e) => { e.preventDefault(); hot(false); });
+  addEventListener("drop", (e) => {
+    if (busy || stageOn()) return;
+    const f = [...e.dataTransfer.files].find((f) => /\.zip$/i.test(f.name));
+    if (f) importZip(f); else say("Drop the EV Nova Community Edition .zip file.", "bad");
+  });
+
+  // ---- buttons -------------------------------------------------------------
+  forgetBtn.addEventListener("click", async () => {
+    if (!confirm("Remove the stored game data from this browser? Pilots and preferences are kept.")) return;
+    const rm = (p) => {
+      for (const n of FS.readdir(p)) {
+        if (n === "." || n === "..") continue;
+        const f = p + "/" + n;
+        if (FS.isDir(FS.stat(f).mode)) { rm(f); FS.rmdir(f); } else FS.unlink(f);
+      }
+    };
+    rm(DATA_DIR); await syncOut(); refresh();
+  });
+
+  playBtn.addEventListener("click", async () => {
+    if (busy) return;
+    if (!haveData()) return;
+    $("setup").classList.add("off"); $("stage").classList.add("on");
+    $("canvas").focus();
+    try {
+      await Module.callMain([]);          // resolves when the game quits
+      say("Game exited. Reload the page to start it again.");
+    } catch (err) {
+      console.error(err);
+      say("Game stopped: " + (err && err.message || err), "bad");
+    }
+    await syncOut();
+    showSetup();
+    playBtn.disabled = true;
+  });
+})();
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

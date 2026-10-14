@@ -1,0 +1,6 @@
+/.emsdk/
+/build/
+/dist/
+*.log
+.DS_Store
+/.cache/
